@@ -63,6 +63,12 @@ ui <- fluidPage(
             selectInput(inputId = "type",
                         label = "Type of features plot:",
                         choices = c("RidgePlot", "VlnPlot", "DotPlot"),
+                        multiple = FALSE
+            ),
+            
+            selectInput(inputId = "split",
+                        label = "Split data by:",
+                        choices = c("Origins", "Identity", "None"),
                         multiple = FALSE)
             
         ),
@@ -99,6 +105,10 @@ server <- function(input, output, session) {
                           inputId = "red",
                           choices = Reductions(datasetInput()),
                           selected = Reductions(datasetInput())[1])
+        updateSelectInput(session = session,
+                          inputId = "split",
+                          choices = c("Origins", "None"),
+                          selected = "None")
     })
     
     output$out_dim <- renderUI({
@@ -143,14 +153,20 @@ server <- function(input, output, session) {
             local({
                 ii <- i
                 output[[paste0('plot_ridge',ii)]] <- renderPlot({
+                    if ( input$split == "Origins" ) {
+                        cat = "orig.ident"
+                    } else if ( input$split == "None" ) {
+                        cat = NULL
+                    }
                     if ( input$type == "RidgePlot" ) {
-                        return(RidgePlot(datasetInput(), 
+                        return(RidgePlot(datasetInput(),
                                          features = input$genes[[ii]],
                                          combine = FALSE))
                     }
                     if ( input$type == "VlnPlot" ) {
                         return(VlnPlot(datasetInput(), 
                                        pt.size = 0,
+                                       split.by = cat,
                                        features = input$genes[[ii]],
                                        combine = FALSE))
                     }
