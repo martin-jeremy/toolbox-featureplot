@@ -50,7 +50,7 @@ ui <- fluidPage(
                          label = "Load"),
             
             selectizeInput(inputId = "genes",
-                    label = "Gene:",
+                    label = "Features:",
                     choices = "",
                     multiple = TRUE
             ),
@@ -63,12 +63,7 @@ ui <- fluidPage(
             selectInput(inputId = "type",
                         label = "Type of features plot:",
                         choices = c("RidgePlot", "VlnPlot", "DotPlot"),
-                        multiple = FALSE
-            ),
-            
-            selectInput(inputId = "groups",
-                        label = "How to categorize data:",
-                        choices = "")
+                        multiple = FALSE)
             
         ),
         
@@ -98,7 +93,7 @@ server <- function(input, output, session) {
     observeEvent(input$load, {
         updateSelectInput(session = session,
                           inputId = "genes",
-                          choices = rownames(datasetInput()),
+                          choices = c( rownames(datasetInput()) , colnames(datasetInput()@meta.data) ) ,
                           selected = rownames(datasetInput())[1])
         updateSelectInput(session = session,
                           inputId = "red",
