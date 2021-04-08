@@ -122,7 +122,6 @@ server <- function(input, output, session) {
                 ii <- i
                 output[[paste0('plot_dim',ii)]] <- renderPlot({
                     return(FeaturePlot(datasetInput(),
-                                       groups = input$groups,
                                        features = input$genes[[ii]],
                                        cols = c("lightgrey","firebrick1"),
                                        min.cutoff = 0,
@@ -156,8 +155,9 @@ server <- function(input, output, session) {
                     }
                     if ( input$type == "VlnPlot" ) {
                         return(VlnPlot(datasetInput(), 
-                                         features = input$genes[[ii]],
-                                         combine = FALSE))
+                                       pt.size = 0,
+                                       features = input$genes[[ii]],
+                                       combine = FALSE))
                     }
                     if ( input$type == "DotPlot" ) {
                         return(DotPlot(datasetInput(), 
