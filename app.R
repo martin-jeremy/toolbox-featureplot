@@ -41,8 +41,7 @@ ui <- fluidPage(
                               # Select dataset as .Rds
                               fileInput(inputId = "ownDS",
                                         label = "Dataset",
-                                        accept = c('.rds','.Rds') )
-                                  
+                                        accept = c('.rds','.Rds'))
             ),
             
             # Load action button
@@ -66,10 +65,21 @@ ui <- fluidPage(
                         multiple = FALSE
             ),
             
-            selectInput(inputId = "split",
-                        label = "Split data by:",
-                        choices = c("Origins", "Identity", "None"),
-                        multiple = FALSE)
+            
+            conditionalPanel( condition = "input.type == 'VlnPlot'",
+                              # Choose to split or not
+                              selectInput(inputId = "split",
+                                          label = "Split data by:",
+                                          choices = c("Origins", "None"),
+                                          multiple = FALSE),
+                              conditionalPanel( condition = "input.split != 'None'",
+                                                # Choose to split plot or nor
+                                                radioButtons(inputId = "split.plot",
+                                                             label = "Do you want to split your Violin Plots",
+                                                             choices = c("No", "Yes"),
+                                                             selected = "No"))
+            )
+            
             
         ),
         
@@ -83,7 +93,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
     
-    options(shiny.maxRequestSize=256*1024^2)
+    options(shiny.maxRequestSize=1024*1024^2)
     
     datasetInput <- reactive({
         if ( input$choice == "Pre-installed") {
@@ -151,10 +161,14 @@ server <- function(input, output, session) {
     observe({
         for (i in 1:length(input$genes)){
             local({
+                sp = FALSE
                 ii <- i
                 output[[paste0('plot_ridge',ii)]] <- renderPlot({
                     if ( input$split == "Origins" ) {
                         cat = "orig.ident"
+                        if ( input$split.plot == "Yes" ) { 
+                            sp = TRUE 
+                        }
                     } else if ( input$split == "None" ) {
                         cat = NULL
                     }
@@ -167,6 +181,7 @@ server <- function(input, output, session) {
                         return(VlnPlot(datasetInput(), 
                                        pt.size = 0,
                                        split.by = cat,
+                                       split.plot = sp,
                                        features = input$genes[[ii]],
                                        combine = FALSE))
                     }
