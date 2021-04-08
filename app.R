@@ -10,7 +10,7 @@
 library(shiny)
 library(Seurat)
 
-rdsfiles <- list.files(path = "./data/", pattern = "\\.rds$")
+rdsfiles <- list.files(path = "./data/", pattern = "\\.rds$" , ignore.case = T)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -60,12 +60,21 @@ ui <- fluidPage(
                         choices = ""
             ),
             
+            selectInput(inputId = "type",
+                        label = "Type of features plot:",
+                        choices = c("RidgePlot", "VlnPlot", "DotPlot"),
+                        multiple = FALSE
+            ),
+            
+            selectInput(inputId = "groups",
+                        label = "How to categorize data:",
+                        choices = "")
             
         ),
         
         # Show a plot of the generated distribution
         mainPanel(
-            splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_ridge'))
+            splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')),
             )
     )
 )
@@ -73,7 +82,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
     
-    options(shiny.maxRequestSize=100*1024^2)
+    options(shiny.maxRequestSize=256*1024^2)
     
     datasetInput <- reactive({
         if ( input$choice == "Pre-installed") {
@@ -112,9 +121,11 @@ server <- function(input, output, session) {
             local({
                 ii <- i
                 output[[paste0('plot_dim',ii)]] <- renderPlot({
-                    return(FeaturePlot(datasetInput(), 
+                    return(FeaturePlot(datasetInput(),
+                                       groups = input$groups,
                                        features = input$genes[[ii]],
-                                       cols = c("lightgrey","red2"), 
+                                       cols = c("lightgrey","firebrick1"),
+                                       min.cutoff = 0,
                                        reduction = input$red,
                                        label = TRUE,
                                        combine = FALSE))
@@ -123,7 +134,7 @@ server <- function(input, output, session) {
         }
     })
     
-    output$out_ridge <- renderUI({
+    output$out_feat <- renderUI({
         out = list()
         
         if (length(input$genes) == 0){return(NULL)}
@@ -138,9 +149,21 @@ server <- function(input, output, session) {
             local({
                 ii <- i
                 output[[paste0('plot_ridge',ii)]] <- renderPlot({
-                    return(RidgePlot(datasetInput(), 
-                                     features = input$genes[[ii]],
-                                     combine = FALSE))
+                    if ( input$type == "RidgePlot" ) {
+                        return(RidgePlot(datasetInput(), 
+                                         features = input$genes[[ii]],
+                                         combine = FALSE))
+                    }
+                    if ( input$type == "VlnPlot" ) {
+                        return(VlnPlot(datasetInput(), 
+                                         features = input$genes[[ii]],
+                                         combine = FALSE))
+                    }
+                    if ( input$type == "DotPlot" ) {
+                        return(DotPlot(datasetInput(), 
+                                       features = input$genes[[ii]],
+                                       cols = "RdYlBu"))
+                    }
                 })
             })
         }
