@@ -20,10 +20,8 @@ PS: If you want to try it with a more consistent dataset, you can save dataset f
 
 ```R
 if (!require('shiny') ) { install.packages('shiny') }
-
 if (!require('Seurat') ) { install.packages('Seurat') }
-
-
+if (!require('devtools') ) { install.packages('devtools') }
 if (!require('SeuratData') ) { devtools::install_github('satijalab/seurat-data') }
 
 InstallData("pbmc3k")
