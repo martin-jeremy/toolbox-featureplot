@@ -24,7 +24,7 @@ if (!require('SeuratData') ) {
 }
 
 InstallData("pbmc3k")
-saveRDS(pbmc3k, "pbmc3k.Rds")
+saveRDS(pbmc3k.final, "pbmc3k.Rds")
 
 shiny::runGitHub("martin-jeremy/toolbox-featureplot", ref = "main")
 ```
