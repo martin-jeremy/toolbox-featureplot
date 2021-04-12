@@ -17,7 +17,7 @@ shiny::runGitHub("martin-jeremy/toolbox-featureplot", ref = "main")
 Enjoy !
 
 Exemple:
-![gif]("FeaturePlot_presentation.gif")
+![gif](https://github.com/martin-jeremy/toolbox-featureplot/blob/main/FeaturePlot_presentation.gif)
 
 PS: If you want to try it with a more consistent dataset, you can save dataset from [SeuratData packages]() as Rds file, then load it in the shiny app
 
