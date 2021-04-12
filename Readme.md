@@ -15,3 +15,16 @@ shiny::runGitHub("martin-jeremy/toolbox-featureplot", ref = "main")
 ```
 
 Enjoy !
+
+PS: If you want to try it with a more consistent dataset, you can save dataset from [SeuratData packages]() as Rds file, then load it in the shiny app
+
+```R
+if (!require('SeuratData') ) {
+  devtools::install_github('satijalab/seurat-data')
+}
+
+InstallData("pbmc3k")
+saveRDS(pbmc3k, "pbmc3k.Rds")
+
+shiny::runGitHub("martin-jeremy/toolbox-featureplot", ref = "main")
+```
