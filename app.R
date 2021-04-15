@@ -97,7 +97,7 @@ server <- function(input, output, session) {
     
     datasetInput <- reactive({
         if ( input$choice == "Pre-installed") {
-            df <- readRDS(paste0("./data/", input$piDS))
+            df <- readRDS(paste0("./Rds/", input$piDS))
             return(df)
         }
         if ( input$choice == "Own data") {
@@ -117,7 +117,7 @@ server <- function(input, output, session) {
                           selected = Reductions(datasetInput())[1])
         updateSelectInput(session = session,
                           inputId = "split",
-                          choices = c("Origins", "None"),
+                          choices = c("None", colnames(datasetInput()@meta.data)[grep(colnames(datasetInput()@meta.data), pattern = "RNA", invert = T)] ),
                           selected = "None")
     })
     
@@ -161,15 +161,14 @@ server <- function(input, output, session) {
     observe({
         for (i in 1:length(input$genes)){
             local({
+                cat = input$split
                 sp = FALSE
                 ii <- i
                 output[[paste0('plot_ridge',ii)]] <- renderPlot({
-                    if ( input$split == "Origins" ) {
-                        cat = "orig.ident"
-                        if ( input$split.plot == "Yes" ) { 
-                            sp = TRUE 
-                        }
-                    } else if ( input$split == "None" ) {
+                    if ( input$split.plot == "Yes" ) { 
+                        sp = TRUE 
+                    } else { sp = FALSE }
+                    if ( input$split == "None" ) {
                         cat = NULL
                     }
                     if ( input$type == "RidgePlot" ) {
