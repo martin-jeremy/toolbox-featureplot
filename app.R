@@ -91,7 +91,7 @@ ui <- fluidPage(
                         tabPanel("Unique Feature", splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')) ),
                         tabPanel("Multiple Features", uiOutput('out_multi')),
                         # tabPanel("Tables" , print("IN COMMING..."))
-                        tabPanel("Tables", uiOutput('out_table'))
+                        tabPanel("Tables", uiOutput('out_table'), downloadButton('export_table', 'Export csv'))
             )
         )
     )
@@ -112,6 +112,8 @@ server <- function(input, output, session) {
             return(data.set)
         }
     })
+    
+    Avg <- reactive({ AverageExpression(datasetInput() , features = input$genes)$RNA})
     
     # AvgMtx <- AverageExpression(datasetInput())
     
@@ -253,10 +255,11 @@ server <- function(input, output, session) {
         })
     })
     
-    output$out_table <- renderTable({
-        Avg <- AverageExpression(datasetInput(), features = input$genes)$RNA
-        return(Avg)
-    }, rownames =T )
+    output$out_table <- renderTable({ return(Avg())} , rownames = T)
+    output$export_table <- downloadHandler(
+        filename = function() { paste("AverageExpression.csv") },
+        content = function(file) { write.csv(Avg(), file, row.names = TRUE, quote = FALSE, col.names = NULL) }
+    )
 }
 
 # Run the application 
