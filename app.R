@@ -7,19 +7,22 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-library(Seurat)
+if (!require(shiny)) { install.packages("shiny") }
+if (!require(shinythemes)) { install.packages("shinythemes") }
+if (!require(Seurat)) { install.packages("Seurat") }
 
 rdsfiles <- list.files(path = "./data/", pattern = "\\.rds$" , ignore.case = T)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
+    
     # Application title
     titlePanel( title = h1("Feature plot from scRNA seq data"),
-                        h3("From pre-processed Seurat object")
-               ),
-
+                h3("From pre-processed Seurat object")
+    ),
+    # Theme to use
+    theme = shinytheme("simplex"),
+    
     # Sidebar with a select input 
     sidebarLayout(
         sidebarPanel(
@@ -49,9 +52,9 @@ ui <- fluidPage(
                          label = "Load"),
             
             selectizeInput(inputId = "genes",
-                    label = "Features:",
-                    choices = "",
-                    multiple = TRUE
+                           label = "Features:",
+                           choices = "",
+                           multiple = TRUE
             ),
             
             selectInput(inputId = "red",
@@ -61,7 +64,7 @@ ui <- fluidPage(
             
             selectInput(inputId = "type",
                         label = "Type of features plot:",
-                        choices = c("RidgePlot", "VlnPlot", "DotPlot"),
+                        choices = c("RidgePlot", "VlnPlot", "DotPlot", "HeatMap"),
                         multiple = FALSE
             ),
             
@@ -80,13 +83,15 @@ ui <- fluidPage(
                                                              selected = "No"))
             )
             
-            
         ),
         
         # Show a plot of the generated distribution
         mainPanel(
-            splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')),
+            tabsetPanel(type = "pills",
+                        tabPanel("Unique Feature", splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')) ),
+                        tabPanel("Multiple Features", uiOutput('out_multi'))
             )
+        )
     )
 )
 
@@ -97,14 +102,16 @@ server <- function(input, output, session) {
     
     datasetInput <- reactive({
         if ( input$choice == "Pre-installed") {
-            df <- readRDS(paste0("./Rds/", input$piDS))
-            return(df)
+            data.set <- readRDS(paste0("./data/", input$piDS))
+            return(data.set)
         }
         if ( input$choice == "Own data") {
-            df <- readRDS(input$ownDS$datapath)
-            return(df)
+            data.set <- readRDS(input$ownDS$datapath)
+            return(data.set)
         }
     })
+    
+    # AvgMtx <- AverageExpression(datasetInput())
     
     observeEvent(input$load, {
         updateSelectInput(session = session,
@@ -170,6 +177,7 @@ server <- function(input, output, session) {
                     } else { sp = FALSE }
                     if ( input$split == "None" ) {
                         cat = NULL
+                        sp = FALSE
                     }
                     if ( input$type == "RidgePlot" ) {
                         return(RidgePlot(datasetInput(),
@@ -189,9 +197,58 @@ server <- function(input, output, session) {
                                        features = input$genes[[ii]],
                                        cols = "RdYlBu"))
                     }
+                    if (input$type == "HeatMap") {
+                        return(DoHeatmap(datasetInput(),
+                                         features = input$genes[[ii]],
+                                         draw.lines = F,
+                                         size = 4))
+                    }
                 })
             })
         }
+    })
+    
+    output$out_multi <- renderUI({
+        if (length(input$genes) < 1){return(NULL)}
+        out <- plotOutput(outputId = "plot_multi")
+        return(out)
+    })
+    
+    observe({
+        output[["plot_multi"]] <- renderPlot({
+            if (input$type == "RidgePlot") {
+                return(RidgePlot(datasetInput(),
+                                 features = input$genes,
+                                 stack = T))
+            }
+            if (input$type == "VlnPlot") {
+                cat = input$split
+                sp = FALSE
+                if ( input$split.plot == "Yes" ) { 
+                    sp = TRUE 
+                } else { sp = FALSE }
+                if ( input$split == "None" ) {
+                    cat = NULL
+                    sp = FALSE
+                }
+                return(VlnPlot(datasetInput(),
+                               features = input$genes,
+                               stack = T,
+                               flip = T,
+                               split.by = cat,
+                               split.plot = sp))
+            }
+            if (input$type == "DotPlot") {
+                return(DotPlot(datasetInput(),
+                               features = input$genes,
+                               cols = "RdYlBu"))
+            }
+            if (input$type == "HeatMap") {
+                return(DoHeatmap(datasetInput(),
+                                 features = input$genes,
+                                 size = 3.5))
+            }
+        })
     })
 }
 
