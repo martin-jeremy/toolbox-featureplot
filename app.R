@@ -90,7 +90,6 @@ ui <- fluidPage(
             tabsetPanel(type = "pills",
                         tabPanel("Unique Feature", splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')) ),
                         tabPanel("Multiple Features", uiOutput('out_multi'), uiOutput('out_multi2')),
-                        # tabPanel("Tables" , print("IN COMMING..."))
                         tabPanel("Tables", uiOutput('out_table'), downloadButton('export_table', 'Export csv'))
             )
         )
