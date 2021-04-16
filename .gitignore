@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # Don't touch data directory
 data/
+
+# Don't up devel app
+devel.app.R
