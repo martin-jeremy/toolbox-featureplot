@@ -89,7 +89,9 @@ ui <- fluidPage(
         mainPanel(
             tabsetPanel(type = "pills",
                         tabPanel("Unique Feature", splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')) ),
-                        tabPanel("Multiple Features", uiOutput('out_multi'))
+                        tabPanel("Multiple Features", uiOutput('out_multi')),
+                        # tabPanel("Tables" , print("IN COMMING..."))
+                        tabPanel("Tables", uiOutput('out_table'))
             )
         )
     )
@@ -250,6 +252,11 @@ server <- function(input, output, session) {
             }
         })
     })
+    
+    output$out_table <- renderTable({
+        Avg <- AverageExpression(datasetInput(), features = input$genes)$RNA
+        return(Avg)
+    }, rownames =T )
 }
 
 # Run the application 
