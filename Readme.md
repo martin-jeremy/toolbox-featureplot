@@ -7,6 +7,10 @@ if (!require('shiny') ) {
   install.packages('shiny')
 }
 
+if (!require('shinythemes') ) {
+  install.packages('shinythemes')
+}
+
 if (!require('Seurat') ) {
   install.packages('Seurat')
 }
