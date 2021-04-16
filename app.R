@@ -21,7 +21,7 @@ ui <- fluidPage(
                 h3("From pre-processed Seurat object")
     ),
     # Theme to use
-    theme = shinytheme("simplex"),
+    themeSelector(),
     
     # Sidebar with a select input 
     sidebarLayout(
@@ -89,7 +89,7 @@ ui <- fluidPage(
         mainPanel(
             tabsetPanel(type = "pills",
                         tabPanel("Unique Feature", splitLayout(cellWidths = c("50%","50%"), uiOutput('out_dim'), uiOutput('out_feat')) ),
-                        tabPanel("Multiple Features", uiOutput('out_multi')),
+                        tabPanel("Multiple Features", uiOutput('out_multi'), uiOutput('out_multi2')),
                         # tabPanel("Tables" , print("IN COMMING..."))
                         tabPanel("Tables", uiOutput('out_table'), downloadButton('export_table', 'Export csv'))
             )
@@ -213,7 +213,7 @@ server <- function(input, output, session) {
     })
     
     output$out_multi <- renderUI({
-        if (length(input$genes) < 1){return(NULL)}
+        if (length(input$genes) <= 1){return(NULL)}
         out <- plotOutput(outputId = "plot_multi")
         return(out)
     })
@@ -252,6 +252,32 @@ server <- function(input, output, session) {
                                  features = input$genes,
                                  size = 3.5))
             }
+        })
+    })
+    
+    output$out_multi2 <- renderUI({
+        if (length(input$genes) <= 1) {return(NULL)}
+        if (input$type == "VlnPlot") {
+            out <- plotOutput(outputId = "plot_multi2")
+        } else { out <- NULL }
+        return(out)
+    })
+    
+    observe({
+        output[["plot_multi2"]] <- renderPlot({
+            cat = input$split
+            sp = FALSE
+            if ( input$split.plot == "Yes" ) { 
+                sp = TRUE 
+            } else { sp = FALSE }
+            if ( input$split == "None" ) {
+                cat = NULL
+                sp = FALSE
+            }
+            return(VlnPlot(datasetInput(),
+                           features = input$genes,
+                           split.by = cat,
+                           split.plot = sp))
         })
     })
     
