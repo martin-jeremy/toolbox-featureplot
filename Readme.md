@@ -24,6 +24,8 @@ Exemple:
 
 ![gif](https://github.com/martin-jeremy/toolbox-featureplot/blob/main/FeaturePlot_presentation.gif)
 
+[This toolbox is also available in ShinyApps.io !](http://martin-jeremy.shinyapps.io/featureplot)
+
 PS: If you want to try it with a more consistent dataset, you can save dataset from [SeuratData packages (satijalab/seurat-data)](https://github.com/satijalab/seurat-data) as Rds file, then load it in the app :
 
 ```R
