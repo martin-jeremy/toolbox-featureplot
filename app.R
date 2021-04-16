@@ -21,7 +21,7 @@ ui <- fluidPage(
                 h3("From pre-processed Seurat object")
     ),
     # Theme to use
-    themeSelector(),
+    theme = shinytheme("flatly"),
     
     # Sidebar with a select input 
     sidebarLayout(
